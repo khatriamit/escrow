@@ -79,6 +79,7 @@ public fun create_escrow<T>(
     amt: Coin<T>,
     occurrence: u8,
     buy_amt: u64,
+    next_buy: u64,
     data: vector<Data>,
     clock: &Clock,
     ctx: &mut TxContext,
@@ -87,7 +88,7 @@ public fun create_escrow<T>(
     assert!( total_amt > 0, EZeroAmount);
     let occ = occurrence_from_u8(occurrence);
     let now = clock.timestamp_ms();
-    let next_buy = calculate_next_buy_ts(now, &occ);
+    // let next_buy = calculate_next_buy_ts(now, &occ);
     
     let pe = PersonalEscrow {
         id: object::new(ctx),
@@ -157,6 +158,7 @@ public fun owner_fetch_fund<T>(
 public fun approve_fetch_fund<T>(
     escrow_cap: &PersonalEscrowApproverCap,
     pe: &mut PersonalEscrow<T>,
+    next_buy: u64,
     clock: &Clock,
     ctx: &mut TxContext,
 ): Coin<T> {
@@ -164,7 +166,7 @@ public fun approve_fetch_fund<T>(
     assert!(object::id(pe) == escrow_cap.`for`, EInvalidEscrow);
     let now = clock.timestamp_ms();
     let b = pe.balance.split(pe.buy_amt);
-    let next_buy = calculate_next_buy_ts(now, &pe.occurrence);
+    //let next_buy = calculate_next_buy_ts(now, &pe.occurrence);
     event::emit(ApproverFundMove {
         escrow: object::id(pe),
         amount: b.value(),
@@ -177,10 +179,11 @@ public fun approve_fetch_fund<T>(
 public fun update_next_buy_ts<T>(
     escrow_cap: &PersonalEscrowApproverCap,
     pe: &mut PersonalEscrow<T>,
+    next_buy: u64,
     clock: &Clock,
 ){
     let now = clock.timestamp_ms();
-    let next_buy = calculate_next_buy_ts(now, &pe.occurrence);
+    // let next_buy = calculate_next_buy_ts(now, &pe.occurrence);
     assert!(object::id(pe) == escrow_cap.`for`, EInvalidEscrow);
     pe.next_buy_ts = next_buy;
     event::emit(UpdateEscrowNextBuy {
