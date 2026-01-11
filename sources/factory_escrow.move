@@ -6,6 +6,8 @@ use sui::event;
 use sui::balance::Balance;
 use sui::coin::Coin;
 use sui::clock::Clock;
+use std::type_name::TypeName;
+use std::type_name;
 
 public enum Occurrence has store, drop, copy {
     Daily,
@@ -17,6 +19,7 @@ public struct Data has store, copy, drop {
     share: u64,
     target_chain: String,
     target_address: String,
+    target_token: String,
 }
 
 
@@ -50,6 +53,7 @@ public struct EscrowCreatedEvent has store, copy, drop {
     owner_cap_id: ID,
     buy_amt: u64,
     total_amt: u64,
+    coin_type: TypeName,
 }
 
 public struct UpdateEscrowNextBuy has store, copy, drop {
@@ -118,7 +122,8 @@ public fun create_escrow<T>(
         buy_amt,
         owner_cap_id: object::id(&escrow_cap),
         admin_cap_id: object::id(&escrow_cap),
-        total_amt
+        total_amt,
+        coin_type: type_name::with_defining_ids<T>(),
     });
     transfer::share_object(pe);
     transfer::transfer(escrow_cap, ctx.sender())
@@ -165,7 +170,7 @@ public fun approve_fetch_fund<T>(
     // assert!(clock.timestamp_ms() >= pe.next_buy_ts, ENotYetTime);
     assert!(object::id(pe) == escrow_cap.`for`, EInvalidEscrow);
     let now = clock.timestamp_ms();
-    let b = pe.balance.split(pe.buy_amt);
+    let b = pe.balance.split(next_buy); //! TODO: be.buy_amt
     //let next_buy = calculate_next_buy_ts(now, &pe.occurrence);
     event::emit(ApproverFundMove {
         escrow: object::id(pe),
@@ -197,9 +202,10 @@ public fun update_next_buy_ts<T>(
 public fun create_data(
     share: u64, 
     target_chain: String, 
-    target_address: String
+    target_address: String,
+    target_token: String,
 ): Data {
-    Data { share, target_chain, target_address }
+    Data { share, target_chain, target_address, target_token }
 }
 
 /// Helper to get occurrence as u8 (for indexing/events)

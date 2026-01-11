@@ -19,7 +19,7 @@ edition = "2024.beta" # edition = "legacy" to use legacy (pre-2024) Move
 
 [addresses]
 escrow = "0x0"
-admin = "0x9c19049d269c7e153b458d9b9ac9f2c5209243836967ab16fc3b2e01f7ba0dc1"
+admin = "0x1bbb3cdeb8246b6b039858d6e09d114b8aa53e7df62783fcde2528cf96871bf8"
 
 # Named addresses will be accessible in Move as `@name`. They're also exported:
 # for example, `std = "0x1"` is exported by the Standard Library.
